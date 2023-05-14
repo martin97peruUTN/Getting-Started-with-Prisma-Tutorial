@@ -1,8 +1,12 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 
+import { Prisma, PrismaClient, Provider } from '@prisma/client';
+
+const prisma = new PrismaClient();
+
 type ResponseData = {
   message: string;
-  data?: any;
+  data?: Provider;
 };
 
 export default async (
@@ -11,7 +15,18 @@ export default async (
 ) => {
   if (req.method === 'POST') {
     try {
-      res.status(200).json({ message: 'Provider added!', data: null });
+      const { name, account } = JSON.parse(req.body);
+
+      const data: Prisma.ProviderCreateInput = {
+        name,
+        account
+      };
+
+      const provider = await prisma.provider.create({
+        data
+      });
+
+      res.status(200).json({ message: 'Provider added!', data: provider });
     } catch (err) {
       return res.status(400).json({ message: 'Something went wrong' });
     }

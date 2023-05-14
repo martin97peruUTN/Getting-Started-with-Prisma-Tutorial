@@ -1,4 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
+import { Prisma, PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
 
 type ResponseData = {
   message: string;
@@ -17,7 +20,22 @@ export default async (
 
   if (req.method === 'PATCH') {
     try {
-      return res.status(200).json({ message: 'Provider updated!', data: null });
+      const { name, account } = JSON.parse(req.body);
+
+      const input: Prisma.ProviderUpdateArgs = {
+        where: {
+          id: id as string
+        },
+        data: {
+          name,
+          account,
+          updatedAt: new Date()
+        }
+      };
+
+      const provider = await prisma.provider.update(input);
+      
+      return res.status(200).json({ message: 'Provider updated!', data: provider });
     } catch (err) {
       return res.status(400).json({ message: 'Something went wrong' });
     }
@@ -25,7 +43,14 @@ export default async (
 
   if (req.method === 'DELETE') {
     try {
-      return res.status(200).json({ message: 'Provider deleted!', data: null });
+
+      const provider = await prisma.provider.delete({
+        where: {
+          id: id as string
+        }
+      });
+
+      return res.status(200).json({ message: 'Provider deleted!', data: provider });
     } catch (err) {
       return res.status(400).json({ message: 'Something went wrong' });
     }

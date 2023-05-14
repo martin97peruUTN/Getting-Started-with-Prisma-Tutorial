@@ -1,8 +1,11 @@
+import { Campaign, Prisma, PrismaClient } from '@prisma/client';
 import type { NextApiRequest, NextApiResponse } from 'next';
+
+const prisma = new PrismaClient();
 
 type ResponseData = {
   message: string;
-  data?: any;
+  data?: Campaign;
 };
 
 export default async (
@@ -11,7 +14,16 @@ export default async (
 ) => {
   if (req.method === 'POST') {
     try {
-      res.status(200).json({ message: 'Provider added!', data: null });
+      const { name, description } = JSON.parse(req.body);
+
+      const data: Prisma.CampaignCreateInput = {
+        name,
+        description
+      };
+
+      const campaign = await prisma.campaign.create({ data });
+
+      res.status(200).json({ message: 'Campaign added!', data: campaign });
     } catch (err) {
       return res.status(400).json({ message: 'Something went wrong' });
     }

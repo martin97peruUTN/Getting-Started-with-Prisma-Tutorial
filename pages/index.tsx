@@ -6,9 +6,32 @@ import AddPostModal from '../components/AddPostModal';
 import CalendarEvent from '../components/CalendarEvent';
 import UpdatePostModal from '../components/UpdatePostModal';
 import { localizer } from '../lib/util';
+import { GetServerSideProps } from 'next';
+//import { PrismaClient } from '@prisma/client';
+import { prisma } from '../db'// /index, es lo mismo porque se llama index el archivo
 
-const Index = () => {
-  const posts = [];
+//const prisma = new PrismaClient();
+
+export const getServerSideProps: GetServerSideProps = async () => {
+  const posts = await prisma.post.findMany({
+    include: {
+      provider: true,
+      campaigns: true
+    }
+  })
+  const providers = await prisma.provider.findMany();
+  const campaigns = await prisma.campaign.findMany();
+  return {
+    props: {
+      posts: JSON.parse(JSON.stringify(posts)),
+      providers: JSON.parse(JSON.stringify(providers)),
+      campaigns: JSON.parse(JSON.stringify(campaigns))
+    }
+  }
+}
+
+const Index = ({ posts, providers, campaigns }) => {
+  //const posts = [];
   const [events, setEvents] = useState(
     posts.map((p) => ({
       ...p,
@@ -61,8 +84,8 @@ const Index = () => {
           setNewPost(null);
         }}
         onAddPostError={(err) => toast.error(err)}
-        providers={[]}
-        campaigns={[]}
+        providers={providers}
+        campaigns={campaigns}
       />
 
       <UpdatePostModal
@@ -91,8 +114,8 @@ const Index = () => {
           setPostToUpdate(null);
         }}
         onDeletePostError={(err) => toast.error(err)}
-        providers={[]}
-        campaigns={[]}
+        providers={providers}
+        campaigns={campaigns}
         post={postToUpdate}
       />
     </div>

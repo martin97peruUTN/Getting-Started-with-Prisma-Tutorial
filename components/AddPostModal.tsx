@@ -9,14 +9,17 @@ import ProviderOptionLabel from './ProviderOptionLabel';
 import SideModal from './SideModal';
 import TimeInput from './TimeInput';
 
+import { PostResult } from '../lib/types';
+import { Campaign, Provider } from '@prisma/client';
+
 interface AddPostModalProps {
   isOpen: boolean;
   date: Date;
   onClose: () => void;
-  onAddPostSuccess: (result: any) => void;
+  onAddPostSuccess: (result: PostResult) => void;
   onAddPostError: (err: string) => void;
-  providers: any[];
-  campaigns: any[];
+  providers: Provider[];
+  campaigns: Campaign[];
 }
 
 const AddPostModal = (props: AddPostModalProps) => {

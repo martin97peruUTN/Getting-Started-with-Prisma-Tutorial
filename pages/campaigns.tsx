@@ -9,9 +9,41 @@ import AddCampaignModal from '../components/AddCampaignModal';
 import ResourceAction from '../components/ResourceAction';
 import ResourceCard from '../components/ResourceCard';
 import UpdateCampaignModal from '../components/UpdateCampaignModal';
-import campaignsData from './../lib/data/campaigns.json';
+//import campaignsData from './../lib/data/campaigns.json';
+import { Prisma, PrismaClient } from '@prisma/client';
 
-const Campaigns = () => {
+const prisma = new PrismaClient();
+
+export const getServerSideProps: GetServerSideProps = async () => {
+  const campaigns = await prisma.campaign.findMany({
+    // include: {
+    //   posts: true trae todos los posts relacionados
+    // }
+    include: {
+      posts: {
+        where: {
+          publishAt: {
+            gt: new Date()
+          }
+        },
+        select: {
+          id: true
+        }
+      }
+    }
+  });
+  console.log("back");
+  console.log(campaigns);
+  return {
+    props: {
+      campaignsData: JSON.parse(JSON.stringify(campaigns))
+    }
+  };
+}
+
+const Campaigns = ({ campaignsData }) => {
+  console.log("front");
+  console.log(campaignsData);
   const [campaigns, setCampaigns] = useState(campaignsData);
   const [addCampaignOpen, setAddCampaignOpen] = useState(false);
   const [campaignForEdit, setCampaignForEdit] = useState(null);
